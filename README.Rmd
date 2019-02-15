@@ -1,11 +1,24 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-Diverging Graph Example
------------------------
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Diverging Graph Example
+
 
 ![](diverging.png)
 
-``` r
+
+```r 
 data3 %>% 
   ggplot(aes(x= reorder(issue, (rank)), y = value, fill = barrier)) +
   geom_col() + 
@@ -13,4 +26,4 @@ data3 %>%
   coord_flip()
 ```
 
-See [make\_graph2.Rmd](make_graph2.Rmd) or make\_graph2.nb.html
+See [make_graph2.Rmd](make_graph2.Rmd) or make_graph2.nb.html
