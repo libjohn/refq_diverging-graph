@@ -1,0 +1,69 @@
+---
+title: "diverging graph TEST"
+author:  "John Little"
+abstract: "The following Notebook demonstrates and example of how to make a diverging bar graph in ggplot2."
+date:  "Feb. 15, 2019"
+output: html_notebook
+---
+
+
+
+---
+Step 1.  Load Library Packages and Data
+
+```{r}
+library(tidyverse)
+library(readxl)
+data <- read_excel("dataexample.xlsx")
+```
+
+
+## Transform Data
+
+Make the data long rather than wide.
+
+```{r}
+d2 <- data %>% gather("barrier", "value", -issue) %>% 
+  mutate(barrier = str_replace(barrier, "_", " ")) %>%   # replace underscore with space
+  mutate(barrier = str_to_title(barrier))                # Transform to Title Case
+
+d2
+```
+
+Create a Rank order based on the total.  Join the ranking data into the main table
+
+```{r}
+rank <- d2 %>% 
+  filter(barrier == "Total") %>% 
+  rename(rank = value)
+
+data3 <- left_join(d2, rank, by = c("issue" = "issue")) %>% 
+  select(issue, barrier = barrier.x, value, rank) %>% 
+  filter(barrier != "Total")
+
+data3
+```
+
+## Visualize
+
+
+```{r}
+data3 %>% 
+  ggplot(aes(x= reorder(issue, (rank)), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_brewer(type = "div", palette = "PuOr") +
+  coord_flip()
+```
+
+
+```{r}
+data3 %>% 
+  ggplot(aes(x= reorder(issue, (rank)), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_manual(values = c("darkorange3", "darkorange", "darkolivegreen", "darkolivegreen3")) +
+  coord_flip()
+```
+
+
+
+

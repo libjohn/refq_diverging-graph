@@ -1,0 +1,112 @@
+---
+title: "diverging graph TEST"
+author:  "John Little"
+date:  "Feb. 15, 2019"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+data <- read_excel("dataexample.xlsx")
+data
+```
+
+
+```{r}
+ggplot(data, aes(x = reorder(issue, -barrier_strong), y = barrier_strong)) + 
+  geom_col() +
+  coord_flip()
+
+#diamonds
+```
+
+
+
+
+
+```{r}
+data("mtcars")  # load data
+mtcars$`car name` <- rownames(mtcars)  # create new column for car names
+mtcars$mpg_z <- round((mtcars$mpg - mean(mtcars$mpg))/sd(mtcars$mpg), 2)  # compute normalized mpg
+mtcars$mpg_type <- ifelse(mtcars$mpg_z < 0, "below", "above")  # above / below avg flag
+mtcars <- mtcars[order(mtcars$mpg_z), ]  # sort
+mtcars$`car name` <- factor(mtcars$`car name`, levels = mtcars$`car name`)  # convert to factor to retain sorted order in plot.
+
+ggplot(mtcars, aes(x=`car name`, y=mpg_z, label=mpg_z)) + 
+  geom_bar(stat='identity', aes(fill=mpg_type), width=.5)  +
+  scale_fill_manual(name="Mileage", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="#00ba38", "below"="#f8766d")) + 
+  labs(subtitle="Normalised mileage from 'mtcars'", 
+       title= "Diverging Bars") + 
+  coord_flip()
+```
+
+
+
+```{r}
+vegSurvey <- 
+data.frame(sampling_point=rep(c(1:5),4),
+           slope=c(rep("North",10),rep("South",10)),
+           veg_Type=rep(c(rep("native",5),rep("introduced",5)),2),
+           spp=as.integer(abs(rnorm(20,5,2))))
+vegSurvey$spp <-   ifelse(vegSurvey$veg_Type =="introduced",vegSurvey$spp+1,vegSurvey$spp)
+
+vegSurvey
+
+```
+
+
+```{r}
+vegSurvey <- vegSurvey %>%  mutate(sppInv= ifelse(veg_Type =="native",spp,spp*-1))
+vegSurvey
+```
+
+```{r}
+vegSurvey %>% filter(slope=="North") %>% 
+ggplot(aes(x=sampling_point, y=sppInv, fill=veg_Type))+
+  geom_bar(stat="identity",position="identity")+
+  xlab("sampling point")+ylab("number of species")+
+  scale_fill_manual(name="Plant type",values = c("#FFA373","#50486D"))+
+  coord_flip()+ggtitle("North slope")+
+  geom_hline(yintercept=0)+
+  xlab("Sampling Points")+
+  ylab("Species number")+
+  scale_y_continuous(breaks = pretty(vegSurvey$sppInv),labels = abs(pretty(vegSurvey$sppInv)))
+```
+
+
+```{r}
+d2 <- data %>% gather("barrier", "value", -issue)
+d2
+```
+
+```{r}
+rank <- d2 %>% 
+  filter(barrier == "total") %>% 
+  rename(rank = value)
+
+#rank ; d2
+
+d2 <- left_join(d2, rank, by = c("issue" = "issue")) %>% 
+  select(issue, barrier = barrier.x, value, rank)
+  
+```
+
+
+
+```{r}
+d2 %>% 
+  filter(barrier != "total") %>% 
+  # aes(x = reorder(issue, -barrier_strong), y = barrier_strong)) + 
+ggplot(aes(x= reorder(issue, (rank)), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_brewer(type = "div", palette = "PuOr") +
+  coord_flip()
+```
+
+
+
+
