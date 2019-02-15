@@ -10,6 +10,7 @@ data3 %>%
   ggplot(aes(x= reorder(issue, (rank)), y = value, fill = barrier)) +
   geom_col() + 
   scale_fill_manual(values = c("darkorange3", "darkorange", "darkolivegreen", "darkolivegreen3")) +
+  # scale_fill_brewer(type = "div", palette = "PuOr") +
   coord_flip()
 ```
 
