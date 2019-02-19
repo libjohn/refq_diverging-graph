@@ -71,10 +71,10 @@ data_totals <- data3 %>% distinct(issue, total) %>% filter(total > 0) %>% mutate
 data_totals
 
 data3 %>% 
-  ggplot(aes(x = issue, 
-             y = value, fill = barrier)) +
-  geom_col() + 
-  geom_label(data = data_totals, aes(x = issue, label = total), 
+  ggplot(aes(x = issue, y = value)) +
+  geom_col(aes(fill = barrier)) + 
+  geom_label(data = data_totals, 
+             aes(label = total), 
              fontface = "bold", show.legend = FALSE) +
   scale_fill_manual(
     values = c("darkorange3", "darkorange", "darkolivegreen", "darkolivegreen3", "white"), 
