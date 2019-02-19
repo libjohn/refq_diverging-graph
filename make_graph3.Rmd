@@ -1,0 +1,90 @@
+---
+title: "diverging graph TEST"
+author:  "John Little"
+abstract: "The following Notebook demonstrates an example of how to make a diverging bar graph in ggplot2."
+date:  "Feb. 19, 2019"
+output: html_notebook
+---
+
+After some work last Sunday I perfected the execution of the `geom_label`.  Upon further study I needed to do some extra processing with two variables as factors.
+
+---
+Step 1.  Load Library Packages and Data
+
+```{r}
+library(tidyverse)
+library(readxl)
+data <- read_excel("dataexample.xlsx")
+```
+
+
+## Transform Data
+
+Make the data long rather than wide.
+
+```{r}
+d2 <- data %>% gather("barrier", "value", -issue, -total) %>% 
+  mutate(barrier = str_replace(barrier, "_", " ")) %>%   # replace underscore with space
+  mutate(barrier = str_to_title(barrier))                # Transform to Title Case
+
+d2
+
+data3 <- d2 %>% 
+  mutate(issue = fct_reorder(issue, total)) %>% 
+  mutate(barrier = fct_relevel(barrier, "Barrier Weak", "Barrier Strong", "Driver Weak", "Driver Strong")) 
+
+data3 
+```
+
+
+## Visualize
+
+
+```{r}
+data3 %>% 
+  ggplot(aes(x= reorder(issue, total), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_brewer(type = "div", palette = "PuOr") +
+  coord_flip()
+```
+
+
+```{r}
+data3 %>% 
+  ggplot(aes(x= reorder(issue, total), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_manual(values = c("darkorange", "darkorange3", "darkolivegreen3", "darkolivegreen")) +
+  coord_flip()
+```
+
+```{r}
+data3 %>% 
+  ggplot(aes(x= reorder(issue, total), y = value, fill = barrier)) +
+  geom_col() + 
+  scale_fill_brewer(type = "div", palette = "PuOr") +
+  annotate("label", x = 11, y = 0, label = data3[11,2]) + 
+  annotate("label", x = 10, y = 0, label = data3[10,2]) +
+  annotate("label", x = 9, y = 0, label = "...") +  
+  coord_flip()
+
+data_totals <- data3 %>% distinct(issue, total) %>% filter(total > 0) %>% mutate(barrier = "Total") %>% mutate(value = 0)
+data_totals
+
+data3 %>% 
+  ggplot(aes(x = issue, 
+             y = value, fill = barrier)) +
+  geom_col() + 
+  geom_label(data = data_totals, aes(x = issue, label = total), 
+             fontface = "bold", show.legend = FALSE) +
+  scale_fill_manual(
+    values = c("darkorange3", "darkorange", "darkolivegreen", "darkolivegreen3", "white"), 
+    breaks = c("Barrier Weak", "Barrier Strong", "Driver Strong", "Driver Weak")) +
+  coord_flip()
+
+
+
+```
+
+
+
+
